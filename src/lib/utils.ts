@@ -1,16 +1,17 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { WSServerEvent } from '../wsServer';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
 }
 
-export function parseJson(str: string) {
+export function parseJson<T extends object>(str: string): T | null {
 	try {
-		return JSON.parse(str);
+		return JSON.parse(str) as T;
 	} catch (error) {
 		console.error('issue parsing JSON', error);
-		return {};
+		return null;
 	}
 }
 
@@ -21,6 +22,10 @@ export function encodeJson<T extends object>(obj: T) {
 		console.error('issue encoding JSON', error);
 		return '';
 	}
+}
+
+export function encodeEvent<T extends WSServerEvent>(event: T) {
+	return encodeJson(event);
 }
 
 export function persistData<T extends object>(key: string, data: T) {
@@ -43,7 +48,7 @@ export function getPersistedData<T extends object>(key: string): T | null {
 }
 
 export function getWsUrl(location: Location) {
-	return `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/_ws/`;
+	return `${location.protocol === 'https:' ? 'wss' : 'ws'}://localhost:3001`;
 }
 
 export async function fetchPost<R extends object, T extends object = object>(
